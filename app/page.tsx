@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AlpicLogo } from "@/components/layout/AlpicLogo";
+import { LoginCreatorFooter } from "@/components/layout/LoginCreatorFooter";
 import { Loader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
 
@@ -74,8 +75,12 @@ export default function HomePage() {
         <div className="login-page__glow login-page__glow--1" aria-hidden />
         <div className="login-page__glow login-page__glow--2" aria-hidden />
 
+        <div className="login-page__panel-inner">
         <div className="login-page__content">
-        <AlpicLogo variant="onDark" size="lg" priority className="mb-2" />
+        <h1 className="sr-only">
+          Alpic — Editor automático de imágenes para redes sociales en Argentina y LATAM
+        </h1>
+        <AlpicLogo variant="onDark" size="lg" priority className="mb-2" aria-hidden />
 
         <form onSubmit={handleSubmit} className="login-page__form">
           <div className="login-pill">
@@ -111,6 +116,9 @@ export default function HomePage() {
         >
           Crear nuevo estilo
         </Link>
+        </div>
+
+        <LoginCreatorFooter />
         </div>
       </section>
     </main>

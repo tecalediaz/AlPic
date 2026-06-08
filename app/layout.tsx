@@ -1,4 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { DesktopOnlyGate } from "@/components/layout/DesktopOnlyGate";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { ROOT_METADATA } from "@/lib/seo";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -43,9 +46,11 @@ const CANVAS_FONTS_URL =
   ].join("&") +
   "&display=swap";
 
-export const metadata: Metadata = {
-  title: "Alpic",
-  description: "Edición automática de fotos para redes sociales",
+export const metadata: Metadata = ROOT_METADATA;
+
+export const viewport: Viewport = {
+  themeColor: "#D62553",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -56,13 +61,14 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark h-full antialiased">
       <head>
+        <StructuredData />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href={UI_FONTS_URL} rel="stylesheet" />
         <link href={CANVAS_FONTS_URL} rel="stylesheet" />
       </head>
       <body className="min-h-full bg-background text-foreground">
-        {children}
+        <DesktopOnlyGate>{children}</DesktopOnlyGate>
         <Toaster />
       </body>
     </html>
