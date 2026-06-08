@@ -37,3 +37,12 @@ export const FONT_GROUPS = [
 ] as const;
 
 export const FONT_FAMILIES = FONT_GROUPS.flatMap((g) => g.fonts);
+
+/** Colores más usados para texto en workspace (blanco, negro, marca, amarillo, acento). */
+export const WORKSPACE_QUICK_TEXT_COLORS = [
+  "#ffffff",
+  "#000000",
+  "#D62553",
+  "#FACC15",
+  "#00B4D8",
+] as const;

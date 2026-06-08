@@ -6,6 +6,7 @@ import {
   FabricImage,
   FabricObject,
   Group,
+  IText,
   Rect,
   type FabricObject as FabricObjectType,
 } from "fabric";
@@ -174,6 +175,33 @@ export function placeGradientLayer(canvas: Canvas, layer: Rect) {
 
 export function isUserPhoto(obj: FabricObjectType | undefined) {
   return (obj as FabricObjectType & { name?: string })?.name === "user-photo";
+}
+
+export function isUserText(obj: FabricObjectType | undefined) {
+  return (obj as FabricObjectType & { name?: string })?.name === "user-text";
+}
+
+export function addTextToCanvas(
+  canvas: Canvas,
+  canvasWidth: number,
+  canvasHeight: number,
+  options?: { name?: string },
+) {
+  const text = new IText("Texto", {
+    left: canvasWidth / 2 - 40,
+    top: canvasHeight / 2 - 20,
+    fontFamily: "Elms Sans",
+    fontSize: 32,
+    fill: "#ffffff",
+    name: options?.name,
+    selectable: true,
+    evented: true,
+  });
+  applyHighQualityObjectSettings(text);
+  canvas.add(text);
+  canvas.setActiveObject(text);
+  canvas.renderAll();
+  return text;
 }
 
 export function isSVGGroup(obj: FabricObjectType | undefined) {

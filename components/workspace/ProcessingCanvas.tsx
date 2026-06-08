@@ -3,8 +3,11 @@
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import { Canvas, type FabricObject } from "fabric";
 import {
+  addTextToCanvas,
   countStaleBlobImages,
   initFabricCustomProperties,
+  isUserPhoto,
+  isUserText,
   rehydrateGradientLayers,
   sanitizeFabricJson,
 } from "@/lib/fabric-utils";
@@ -19,12 +22,20 @@ import {
 } from "@/lib/image-export";
 import type { AspectRatio } from "@/types";
 import { getCanvasDimensions } from "@/lib/canvas-config";
+import {
+  countUserTexts,
+  getUserTextPickerPosition,
+  type UserTextPickerPosition,
+} from "@/lib/workspace-text";
 
 export interface ProcessingCanvasHandle {
   getCanvas: () => Canvas | null;
   exportImage: () => string | null;
   getExportMultiplier: () => number;
   setUserPhoto: (source: string | File) => Promise<void>;
+  addText: () => void;
+  deleteSelectedUserText: () => boolean;
+  applyColorToUserText: (color: string) => boolean;
 }
 
 interface ProcessingCanvasProps {
@@ -36,19 +47,42 @@ interface ProcessingCanvasProps {
   onWarning?: (message: string) => void;
   /** Se dispara al cambiar la foto del usuario (subir / mover / escalar). */
   onPhotoChange?: () => void;
+  /** Hover sobre un texto agregado por el usuario en workspace. */
+  onUserTextHover?: (
+    obj: (FabricObject & { fontFamily?: string }) | null,
+    position: UserTextPickerPosition | null,
+  ) => void;
+  onUserTextCountChange?: (count: number) => void;
+  onUserTextSelectionChange?: (
+    obj: (FabricObject & { fill?: string | object }) | null,
+  ) => void;
 }
 
 const ProcessingCanvas = forwardRef<ProcessingCanvasHandle, ProcessingCanvasProps>(
   function ProcessingCanvas(
-    { aspectRatio, fabricJson, onReady, onError, onWarning, onPhotoChange },
+    {
+      aspectRatio,
+      fabricJson,
+      onReady,
+      onError,
+      onWarning,
+      onPhotoChange,
+      onUserTextHover,
+      onUserTextCountChange,
+      onUserTextSelectionChange,
+    },
     ref,
   ) {
     const containerRef = useRef<HTMLDivElement>(null);
     const fabricRef = useRef<Canvas | null>(null);
+    const hoveredUserTextRef = useRef<FabricObject | null>(null);
     const onPhotoChangeRef = useRef(onPhotoChange);
     const onErrorRef = useRef(onError);
     const onWarningRef = useRef(onWarning);
     const onReadyRef = useRef(onReady);
+    const onUserTextHoverRef = useRef(onUserTextHover);
+    const onUserTextCountChangeRef = useRef(onUserTextCountChange);
+    const onUserTextSelectionChangeRef = useRef(onUserTextSelectionChange);
     const fabricJsonKey = JSON.stringify(fabricJson);
     const { displayWidth, displayHeight } = getCanvasDimensions(aspectRatio);
 
@@ -57,11 +91,46 @@ const ProcessingCanvas = forwardRef<ProcessingCanvasHandle, ProcessingCanvasProp
       onErrorRef.current = onError;
       onWarningRef.current = onWarning;
       onReadyRef.current = onReady;
+      onUserTextHoverRef.current = onUserTextHover;
+      onUserTextCountChangeRef.current = onUserTextCountChange;
+      onUserTextSelectionChangeRef.current = onUserTextSelectionChange;
     });
+
+    function notifyUserTextCount() {
+      const canvas = fabricRef.current;
+      if (!canvas) return;
+      onUserTextCountChangeRef.current?.(countUserTexts(canvas));
+    }
+
+    function notifyUserTextSelection(obj: FabricObject | null | undefined) {
+      if (!obj || !isUserText(obj)) {
+        onUserTextSelectionChangeRef.current?.(null);
+        return;
+      }
+      onUserTextSelectionChangeRef.current?.(
+        obj as FabricObject & { fill?: string | object },
+      );
+    }
+
+    function notifyUserTextHover(obj: FabricObject | null) {
+      const canvas = fabricRef.current;
+      if (!canvas || !obj || !isUserText(obj)) {
+        hoveredUserTextRef.current = null;
+        onUserTextHoverRef.current?.(null, null);
+        return;
+      }
+
+      hoveredUserTextRef.current = obj;
+      onUserTextHoverRef.current?.(
+        obj as FabricObject & { fontFamily?: string },
+        getUserTextPickerPosition(canvas, obj),
+      );
+    }
 
     function applyStyleObjectSettings(canvas: Canvas) {
       applyHighQualityToAllObjects(canvas.getObjects());
       canvas.getObjects().forEach((obj) => {
+        if (isUserPhoto(obj) || isUserText(obj)) return;
         obj.set({ selectable: false, evented: false });
       });
     }
@@ -150,6 +219,45 @@ const ProcessingCanvas = forwardRef<ProcessingCanvasHandle, ProcessingCanvasProp
         c.renderAll();
         onPhotoChangeRef.current?.();
       },
+
+      addText: () => {
+        const c = fabricRef.current;
+        if (!c) return;
+        const text = addTextToCanvas(c, displayWidth, displayHeight, { name: "user-text" });
+        notifyUserTextCount();
+        notifyUserTextSelection(text);
+      },
+
+      deleteSelectedUserText: () => {
+        const c = fabricRef.current;
+        if (!c) return false;
+
+        const active = c.getActiveObject();
+        if (!active || !isUserText(active)) return false;
+
+        c.remove(active);
+        c.discardActiveObject();
+        c.renderAll();
+        notifyUserTextHover(null);
+        notifyUserTextCount();
+        notifyUserTextSelection(null);
+        return true;
+      },
+
+      applyColorToUserText: (color: string) => {
+        const c = fabricRef.current;
+        if (!c) return false;
+
+        const active = c.getActiveObject();
+        const target =
+          active && isUserText(active) ? active : hoveredUserTextRef.current;
+        if (!target || !isUserText(target)) return false;
+
+        target.set({ fill: color });
+        c.renderAll();
+        notifyUserTextSelection(target);
+        return true;
+      },
     }));
 
     useEffect(() => {
@@ -219,6 +327,37 @@ const ProcessingCanvas = forwardRef<ProcessingCanvasHandle, ProcessingCanvasProp
           if (target?.name === "user-photo") onPhotoChangeRef.current?.();
         };
         canvas.on("object:modified", handlePhotoMutated);
+
+        const handleUserTextHover = (opt: { target?: FabricObject }) => {
+          const target = opt.target;
+          if (!target || !isUserText(target)) return;
+          const editing = target as FabricObject & { isEditing?: boolean };
+          if (editing.isEditing) return;
+          notifyUserTextHover(target);
+        };
+
+        const handleUserTextHoverOut = (opt: { target?: FabricObject }) => {
+          if (opt.target !== hoveredUserTextRef.current) return;
+          notifyUserTextHover(null);
+        };
+
+        const handleUserTextMoved = (opt: { target?: FabricObject }) => {
+          if (opt.target !== hoveredUserTextRef.current) return;
+          notifyUserTextHover(opt.target);
+        };
+
+        const handleUserTextSelection = () => {
+          notifyUserTextSelection(canvas?.getActiveObject());
+        };
+
+        canvas.on("mouse:over", handleUserTextHover);
+        canvas.on("mouse:out", handleUserTextHoverOut);
+        canvas.on("object:moving", handleUserTextMoved);
+        canvas.on("object:scaling", handleUserTextMoved);
+        canvas.on("object:rotating", handleUserTextMoved);
+        canvas.on("selection:created", handleUserTextSelection);
+        canvas.on("selection:updated", handleUserTextSelection);
+        canvas.on("selection:cleared", () => notifyUserTextSelection(null));
 
         onReadyRef.current?.();
       }

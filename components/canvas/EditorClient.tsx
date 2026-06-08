@@ -306,7 +306,7 @@ export function EditorClient({ codeId, styleId, initialStyle }: EditorClientProp
           />
         </aside>
 
-        <main className="canvas-checkerboard panel-scroll flex items-center justify-center overflow-auto p-8">
+        <main className="panel-scroll flex items-center justify-center overflow-auto bg-background p-8">
           <FabricCanvas
             ref={canvasRef}
             width={displayWidth}

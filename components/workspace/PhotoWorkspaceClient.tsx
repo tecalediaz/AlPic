@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { FabricObject } from "fabric";
 import dynamic from "next/dynamic";
 import { ImageUploader } from "@/components/workspace/ImageUploader";
 import { ExportControls } from "@/components/workspace/ExportControls";
@@ -8,10 +9,15 @@ import type { ProcessingCanvasHandle } from "@/components/workspace/ProcessingCa
 import { getCanvasDimensions } from "@/lib/canvas-config";
 import { getExportDimensions, getImageNaturalSize } from "@/lib/image-export";
 import { WORKSPACE_CONTROLS_WIDTH } from "@/lib/layout";
-import { ASPECT_RATIOS } from "@/lib/constants";
+import { ASPECT_RATIOS, WORKSPACE_QUICK_TEXT_COLORS } from "@/lib/constants";
 import type { Style } from "@/types";
+import { Type } from "lucide-react";
 import { LoaderCenter } from "@/components/ui/loader";
 import { GlassPageHeader } from "@/components/layout/GlassPageHeader";
+import { WorkspaceTextColorSwatches } from "@/components/workspace/WorkspaceTextColorSwatches";
+import { WorkspaceTextFontPicker } from "@/components/workspace/WorkspaceTextFontPicker";
+import { isUserText } from "@/lib/fabric-utils";
+import type { UserTextPickerPosition } from "@/lib/workspace-text";
 
 const ProcessingCanvas = dynamic(
   () => import("@/components/workspace/ProcessingCanvas"),
@@ -32,6 +38,14 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
   const [exportMultiplier, setExportMultiplier] = useState(1);
   const [canvasError, setCanvasError] = useState<string | null>(null);
   const [canvasWarning, setCanvasWarning] = useState<string | null>(null);
+  const [userTextCount, setUserTextCount] = useState(0);
+  const [activeTextColor, setActiveTextColor] = useState<string | undefined>();
+  const [fontPicker, setFontPicker] = useState<{
+    position: UserTextPickerPosition;
+    activeFont: string;
+  } | null>(null);
+  const hoveredTextRef = useRef<(FabricObject & { fontFamily?: string }) | null>(null);
+  const hideFontPickerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { displayWidth, displayHeight } = getCanvasDimensions(style.aspect_ratio);
   const exportDims = getExportDimensions(displayWidth, displayHeight, exportMultiplier);
@@ -49,11 +63,125 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
     setExportMultiplier(canvasRef.current?.getExportMultiplier() ?? 1);
   }, []);
 
+  const clearHideFontPickerTimeout = useCallback(() => {
+    if (hideFontPickerTimeoutRef.current) {
+      clearTimeout(hideFontPickerTimeoutRef.current);
+      hideFontPickerTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleHideFontPicker = useCallback(() => {
+    clearHideFontPickerTimeout();
+    hideFontPickerTimeoutRef.current = setTimeout(() => {
+      hoveredTextRef.current = null;
+      setFontPicker(null);
+    }, 160);
+  }, [clearHideFontPickerTimeout]);
+
+  const handleUserTextHover = useCallback(
+    (
+      obj: (FabricObject & { fontFamily?: string }) | null,
+      position: UserTextPickerPosition | null,
+    ) => {
+      if (!obj || !position) {
+        scheduleHideFontPicker();
+        return;
+      }
+
+      clearHideFontPickerTimeout();
+      hoveredTextRef.current = obj;
+      setFontPicker({
+        position,
+        activeFont: obj.fontFamily ?? "Elms Sans",
+      });
+    },
+    [clearHideFontPickerTimeout, scheduleHideFontPicker],
+  );
+
+  const handleSelectColor = useCallback((color: string) => {
+    if (canvasRef.current?.applyColorToUserText(color)) {
+      setActiveTextColor(color);
+    }
+  }, []);
+
+  const handleUserTextSelectionChange = useCallback(
+    (obj: (FabricObject & { fill?: string | object }) | null) => {
+      if (!obj || typeof obj.fill !== "string") {
+        setActiveTextColor(undefined);
+        return;
+      }
+      setActiveTextColor(obj.fill);
+    },
+    [],
+  );
+
+  const handleSelectFont = useCallback((font: string) => {
+    const obj = hoveredTextRef.current;
+    if (!obj || !isUserText(obj)) return;
+
+    obj.set({ fontFamily: font });
+    obj.canvas?.renderAll();
+    setFontPicker((current) => (current ? { ...current, activeFont: font } : current));
+  }, []);
+
+  useEffect(() => {
+    if (!hasPhoto) return;
+
+    function isTypingTarget(target: EventTarget | null): boolean {
+      if (!(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      return (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        target.isContentEditable
+      );
+    }
+
+    function handleKeyDown(e: KeyboardEvent) {
+      const editingText = canvasRef.current
+        ?.getCanvas()
+        ?.getActiveObject() as { isEditing?: boolean } | undefined;
+      if (isTypingTarget(e.target) || editingText?.isEditing) return;
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (canvasRef.current?.deleteSelectedUserText()) {
+          e.preventDefault();
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [hasPhoto]);
+
+  useEffect(() => () => clearHideFontPickerTimeout(), [clearHideFontPickerTimeout]);
+
   return (
     <div className="flex h-screen flex-col bg-background">
       <GlassPageHeader
         backHref={`/estilos/${codeId}`}
         backLabel="← Estilos"
+        leftActions={
+          hasPhoto ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="liquid-glass-btn glass-header-action"
+                onClick={() => canvasRef.current?.addText()}
+              >
+                <Type className="h-4 w-4" />
+                Agregar texto
+              </button>
+              <WorkspaceTextColorSwatches
+                visible={userTextCount > 0}
+                colors={WORKSPACE_QUICK_TEXT_COLORS}
+                activeColor={activeTextColor}
+                onSelectColor={handleSelectColor}
+              />
+            </div>
+          ) : null
+        }
         title={style.name}
         subtitle={`${style.aspect_ratio} — ${ASPECT_RATIOS[style.aspect_ratio].label}`}
       />
@@ -105,15 +233,29 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
                   {canvasWarning}
                 </div>
               ) : null}
-              <ProcessingCanvas
-                key={`${style.id}-${style.updated_at}`}
-                ref={canvasRef}
-                aspectRatio={style.aspect_ratio}
-                fabricJson={style.fabric_json}
-                onError={setCanvasError}
-                onWarning={setCanvasWarning}
-                onPhotoChange={refreshExportMultiplier}
-              />
+              <div className="relative">
+                <ProcessingCanvas
+                  key={`${style.id}-${style.updated_at}`}
+                  ref={canvasRef}
+                  aspectRatio={style.aspect_ratio}
+                  fabricJson={style.fabric_json}
+                  onError={setCanvasError}
+                  onWarning={setCanvasWarning}
+                  onPhotoChange={refreshExportMultiplier}
+                  onUserTextHover={handleUserTextHover}
+                  onUserTextCountChange={setUserTextCount}
+                  onUserTextSelectionChange={handleUserTextSelectionChange}
+                />
+                {fontPicker ? (
+                  <WorkspaceTextFontPicker
+                    position={fontPicker.position}
+                    activeFont={fontPicker.activeFont}
+                    onSelectFont={handleSelectFont}
+                    onPointerEnter={clearHideFontPickerTimeout}
+                    onPointerLeave={scheduleHideFontPicker}
+                  />
+                ) : null}
+              </div>
             </>
           )}
         </div>

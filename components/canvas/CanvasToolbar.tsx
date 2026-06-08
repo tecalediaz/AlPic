@@ -1,10 +1,15 @@
 "use client";
 
 import { useRef } from "react";
-import { Circle, IText, Rect, type Canvas } from "fabric";
+import { Circle, Rect, type Canvas } from "fabric";
 import { Type, ImagePlus, Square, Circle as CircleIcon, Blend } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createGradientLayer, loadSVGAsGroup, placeGradientLayer } from "@/lib/fabric-utils";
+import {
+  addTextToCanvas,
+  createGradientLayer,
+  loadSVGAsGroup,
+  placeGradientLayer,
+} from "@/lib/fabric-utils";
 import { ACCEPTED_IMAGE_TYPES, readFileAsText } from "@/lib/canvas-config";
 import {
   calcFitScale,
@@ -34,16 +39,8 @@ export function CanvasToolbar({
 
   function addText() {
     if (!canvas) return;
-    const text = new IText("Texto", {
-      left: canvasWidth / 2 - 40,
-      top: canvasHeight / 2 - 20,
-      fontFamily: "Elms Sans",
-      fontSize: 32,
-      fill: "#ffffff",
-    });
-    canvas.add(text);
-    canvas.setActiveObject(text);
-    refresh();
+    addTextToCanvas(canvas, canvasWidth, canvasHeight);
+    onModified();
   }
 
   async function addImage(file: File) {

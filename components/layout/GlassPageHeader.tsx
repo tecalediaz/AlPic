@@ -10,6 +10,7 @@ interface GlassPageStep {
 interface GlassPageHeaderProps {
   backHref?: string;
   backLabel?: string;
+  leftActions?: React.ReactNode;
   title?: string;
   subtitle?: string;
   steps?: GlassPageStep[];
@@ -19,6 +20,7 @@ interface GlassPageHeaderProps {
 export function GlassPageHeader({
   backHref,
   backLabel = "← Volver al inicio",
+  leftActions,
   title,
   subtitle,
   steps,
@@ -26,10 +28,15 @@ export function GlassPageHeader({
 }: GlassPageHeaderProps) {
   return (
     <header className="glass-page-header">
-      {backHref ? (
-        <Link href={backHref} className="liquid-glass-btn glass-header-action glass-header-action--left">
-          {backLabel}
-        </Link>
+      {backHref || leftActions ? (
+        <div className="glass-header-action-group--left">
+          {backHref ? (
+            <Link href={backHref} className="liquid-glass-btn glass-header-action">
+              {backLabel}
+            </Link>
+          ) : null}
+          {leftActions}
+        </div>
       ) : null}
 
       {(title || subtitle) && (
