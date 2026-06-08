@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { LogOut } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
+import { cn } from "@/lib/utils";
 
 interface WorkspaceFloatingBarProps {
   onSwitch: (codeId: string) => void;
@@ -27,6 +29,7 @@ export function WorkspaceFloatingBar({ onSwitch, onExit }: WorkspaceFloatingBarP
       const data = await res.json();
       if (!res.ok || !data.codeId) {
         setError("Código incorrecto");
+        setLoading(false);
         return;
       }
       setCode("");
@@ -34,7 +37,6 @@ export function WorkspaceFloatingBar({ onSwitch, onExit }: WorkspaceFloatingBarP
       onSwitch(data.codeId);
     } catch {
       setError("Error al verificar el código");
-    } finally {
       setLoading(false);
     }
   }
@@ -53,11 +55,12 @@ export function WorkspaceFloatingBar({ onSwitch, onExit }: WorkspaceFloatingBarP
         />
         <button
           type="button"
-          className="workspace-floating-submit"
+          className={cn("workspace-floating-submit", loading && "workspace-floating-submit--loading")}
           disabled={loading || !code.trim()}
+          aria-busy={loading}
           onClick={() => void handleAccess()}
         >
-          {loading ? "..." : "Acceder"}
+          {loading ? <Loader size="sm" /> : "Acceder"}
         </button>
         <div className="workspace-floating-divider" />
         <button

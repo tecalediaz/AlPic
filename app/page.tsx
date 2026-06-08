@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AlpicLogo } from "@/components/layout/AlpicLogo";
+import { Loader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
 
 export default function HomePage() {
@@ -31,16 +32,19 @@ export default function HomePage() {
       if (res.status === 404 && data.error === "not_found") {
         setCodeNotFound(true);
         setError("Este código no existe. Tenés que crear un nuevo estilo.");
+        setLoading(false);
         return;
       }
 
       if (!res.ok) {
         setError("Error al verificar el código");
+        setLoading(false);
         return;
       }
 
       if (!data.codeId) {
         setError("Error al verificar el código");
+        setLoading(false);
         return;
       }
 
@@ -48,7 +52,6 @@ export default function HomePage() {
       window.location.assign(`/estilos/${data.codeId}`);
     } catch {
       setError("Error al verificar el código");
-    } finally {
       setLoading(false);
     }
   }
@@ -92,10 +95,11 @@ export default function HomePage() {
             />
             <button
               type="submit"
-              className="login-pill__submit"
+              className={cn("login-pill__submit", loading && "login-pill__submit--loading")}
               disabled={loading || !code.trim()}
+              aria-busy={loading}
             >
-              {loading ? "..." : "Acceder"}
+              {loading ? <Loader size="sm" /> : "Acceder"}
             </button>
           </div>
           {error && <p className="login-page__error">{error}</p>}

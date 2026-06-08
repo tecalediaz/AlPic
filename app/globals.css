@@ -773,6 +773,22 @@ body {
   cursor: not-allowed;
 }
 
+.login-pill__submit--loading:disabled {
+  opacity: 1;
+  cursor: wait;
+}
+
+.login-pill__submit--loading .loader {
+  background: conic-gradient(
+    from 0deg,
+    #fff 0deg,
+    rgba(255, 255, 255, 0.55) 75deg,
+    rgba(255, 255, 255, 0.15) 200deg,
+    transparent 280deg
+  );
+  box-shadow: none;
+}
+
 .login-page__error {
   font-size: 0.8125rem;
   color: var(--danger);
@@ -1024,6 +1040,22 @@ body {
 .workspace-floating-submit:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.workspace-floating-submit--loading:disabled {
+  opacity: 1;
+  cursor: wait;
+}
+
+.workspace-floating-submit--loading .loader {
+  background: conic-gradient(
+    from 0deg,
+    #fff 0deg,
+    rgba(255, 255, 255, 0.55) 75deg,
+    rgba(255, 255, 255, 0.15) 200deg,
+    transparent 280deg
+  );
+  box-shadow: none;
 }
 
 .workspace-floating-divider {
