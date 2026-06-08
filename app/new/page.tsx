@@ -2,12 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { AlpicLogo } from "@/components/layout/AlpicLogo";
 import { GlassPageHeader } from "@/components/layout/GlassPageHeader";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getInitialFabricJson } from "@/lib/canvas-config";
 
 const STEPS = [
@@ -146,35 +142,28 @@ export default function NewPage() {
             {error && <p className="login-page__error">{error}</p>}
           </form>
         ) : (
-          <Card className="w-full max-w-xl">
-            <CardHeader>
-              <CardTitle>Crear primer estilo</CardTitle>
-              <CardDescription>
-                Definí el nombre y formato de tu primer estilo visual
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCreateStyle} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="styleName">Nombre del estilo</Label>
-                  <Input
-                    id="styleName"
-                    placeholder="Mi primer diseño"
-                    value={styleName}
-                    onChange={(e) => setStyleName(e.target.value)}
-                    autoFocus
-                  />
-                  <p className="text-xs text-muted">
-                    Podés cambiar el formato desde el editor una vez creado
-                  </p>
-                </div>
-                {error && <p className="text-sm text-danger">{error}</p>}
-                <Button type="submit" className="w-full" disabled={loading || !styleName.trim()}>
-                  {loading ? "Creando..." : "Ir al editor"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <form onSubmit={handleCreateStyle} className="login-page__form w-full max-w-3xl">
+            <div className="login-pill">
+              <input
+                id="styleName"
+                type="text"
+                className="login-pill__input"
+                placeholder="Nombre del estilo"
+                value={styleName}
+                onChange={(e) => setStyleName(e.target.value)}
+                autoFocus
+                autoComplete="off"
+              />
+              <button
+                type="submit"
+                className="login-pill__submit"
+                disabled={loading || !styleName.trim()}
+              >
+                {loading ? "..." : "Ir al editor"}
+              </button>
+            </div>
+            {error && <p className="login-page__error">{error}</p>}
+          </form>
         )}
       </div>
     </main>

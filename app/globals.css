@@ -639,16 +639,6 @@ body {
   pointer-events: none;
 }
 
-.login-page__image-brand {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
 .login-page__panel {
   position: relative;
   display: flex;
@@ -789,14 +779,35 @@ body {
 }
 
 .login-page__link {
+  display: inline-block;
   font-size: 0.8125rem;
   color: var(--muted);
   text-decoration: none;
-  transition: color 150ms ease;
+  transition: color 150ms ease, transform 150ms ease;
+  transform-origin: center;
 }
 
 .login-page__link:hover {
   color: var(--accent);
+}
+
+.login-page__link--highlight {
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+  animation: login-link-pulse 0.7s ease-out forwards;
+}
+
+@keyframes login-link-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1.08);
+  }
 }
 
 /* ─── Glass page header ────────────────────────────────────────────────────── */

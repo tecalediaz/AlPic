@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const result = await sql`SELECT id FROM codes WHERE code_hash = ${codeHash}`;
 
     if (result.length === 0) {
-      return NextResponse.json({ error: "Código incorrecto" }, { status: 401 });
+      return NextResponse.json({ error: "not_found" }, { status: 404 });
     }
 
     const codeId = result[0].id as string;

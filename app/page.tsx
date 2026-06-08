@@ -4,15 +4,18 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AlpicLogo } from "@/components/layout/AlpicLogo";
+import { cn } from "@/lib/utils";
 
 export default function HomePage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [codeNotFound, setCodeNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setCodeNotFound(false);
     setLoading(true);
 
     try {
@@ -25,8 +28,14 @@ export default function HomePage() {
 
       const data = await res.json();
 
+      if (res.status === 404 && data.error === "not_found") {
+        setCodeNotFound(true);
+        setError("Este código no existe. Tenés que crear un nuevo estilo.");
+        return;
+      }
+
       if (!res.ok) {
-        setError("Código incorrecto");
+        setError("Error al verificar el código");
         return;
       }
 
@@ -56,9 +65,6 @@ export default function HomePage() {
           className="login-page__image-src"
         />
         <div className="login-page__image-overlay" />
-        <div className="login-page__image-brand">
-          <AlpicLogo variant="onLight" size="lg" priority />
-        </div>
       </section>
 
       <section className="login-page__panel">
@@ -75,7 +81,13 @@ export default function HomePage() {
               className="login-pill__input"
               placeholder="Código de acceso"
               value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onChange={(e) => {
+                setCode(e.target.value);
+                if (codeNotFound) {
+                  setCodeNotFound(false);
+                  setError("");
+                }
+              }}
               autoComplete="off"
             />
             <button
@@ -89,7 +101,10 @@ export default function HomePage() {
           {error && <p className="login-page__error">{error}</p>}
         </form>
 
-        <Link href="/new" className="login-page__link">
+        <Link
+          href="/new"
+          className={cn("login-page__link", codeNotFound && "login-page__link--highlight")}
+        >
           Crear nuevo estilo
         </Link>
         </div>
