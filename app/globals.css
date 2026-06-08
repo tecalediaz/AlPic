@@ -639,6 +639,16 @@ body {
   pointer-events: none;
 }
 
+.login-page__image-brand {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
 .login-page__panel {
   position: relative;
   display: flex;

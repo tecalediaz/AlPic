@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Undo2, Redo2, ChevronDown } from "lucide-react";
 import { AlignmentBar } from "@/components/canvas/AlignmentBar";

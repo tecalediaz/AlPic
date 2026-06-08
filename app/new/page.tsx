@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { AlpicLogo } from "@/components/layout/AlpicLogo";
 import { GlassPageHeader } from "@/components/layout/GlassPageHeader";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -110,7 +111,9 @@ export default function NewPage() {
         }))}
       />
 
-      <div className="flex flex-1 items-center justify-center px-8">
+      <div className="flex flex-1 flex-col items-center justify-center gap-8 px-8">
+        <AlpicLogo variant="onDark" size="lg" />
+
         {step === 1 ? (
           <form onSubmit={handleCreateCode} className="login-page__form w-full max-w-3xl">
             <div className="login-pill">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { AlpicLogo } from "@/components/layout/AlpicLogo";
 
 export default function HomePage() {
   const [code, setCode] = useState("");
@@ -55,6 +56,9 @@ export default function HomePage() {
           className="login-page__image-src"
         />
         <div className="login-page__image-overlay" />
+        <div className="login-page__image-brand">
+          <AlpicLogo variant="onLight" size="lg" priority />
+        </div>
       </section>
 
       <section className="login-page__panel">
@@ -62,7 +66,7 @@ export default function HomePage() {
         <div className="login-page__glow login-page__glow--2" aria-hidden />
 
         <div className="login-page__content">
-        <h1 className="login-page__title">Acceder al workspace</h1>
+        <AlpicLogo variant="onDark" size="lg" priority className="mb-2" />
 
         <form onSubmit={handleSubmit} className="login-page__form">
           <div className="login-pill">

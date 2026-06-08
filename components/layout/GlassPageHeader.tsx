@@ -26,11 +26,11 @@ export function GlassPageHeader({
 }: GlassPageHeaderProps) {
   return (
     <header className="glass-page-header">
-      {backHref && (
+      {backHref ? (
         <Link href={backHref} className="liquid-glass-btn glass-header-action glass-header-action--left">
           {backLabel}
         </Link>
-      )}
+      ) : null}
 
       {(title || subtitle) && (
         <div className="glass-page-header__center">
