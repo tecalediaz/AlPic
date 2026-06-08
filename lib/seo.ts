@@ -94,6 +94,15 @@ export function buildPageMetadata({
 
 export const ROOT_METADATA: Metadata = {
   metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
+    shortcut: ["/favicon.ico"],
+  },
   applicationName: SITE_NAME,
   title: {
     default: `${SITE_NAME} — ${SITE_TAGLINE}`,

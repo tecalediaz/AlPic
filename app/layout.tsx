@@ -62,6 +62,9 @@ export default function RootLayout({
     <html lang="es" className="dark h-full antialiased">
       <head>
         <StructuredData />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href={UI_FONTS_URL} rel="stylesheet" />
