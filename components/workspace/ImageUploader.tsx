@@ -8,9 +8,10 @@ import { toast } from "sonner";
 interface ImageUploaderProps {
   onUpload: (file: File) => void | Promise<void>;
   disabled?: boolean;
+  className?: string;
 }
 
-export function ImageUploader({ onUpload, disabled }: ImageUploaderProps) {
+export function ImageUploader({ onUpload, disabled, className }: ImageUploaderProps) {
   const [dragOver, setDragOver] = useState(false);
 
   const handleFile = useCallback(
@@ -31,9 +32,10 @@ export function ImageUploader({ onUpload, disabled }: ImageUploaderProps) {
   return (
     <div
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-colors",
-        dragOver ? "border-accent bg-accent-muted" : "border-border hover:border-muted-foreground",
+        "liquid-glass-btn flex min-h-[6.75rem] cursor-pointer flex-col items-center justify-center rounded-xl p-8",
+        dragOver && "scale-[1.02] border-accent/40",
         disabled && "pointer-events-none opacity-50",
+        className,
       )}
       onDragOver={(e) => {
         e.preventDefault();

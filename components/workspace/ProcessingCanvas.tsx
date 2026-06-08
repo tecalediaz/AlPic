@@ -33,6 +33,7 @@ export interface ProcessingCanvasHandle {
   exportImage: () => string | null;
   getExportMultiplier: () => number;
   setUserPhoto: (source: string | File) => Promise<void>;
+  clearUserPhoto: () => boolean;
   addText: () => void;
   deleteSelectedUserText: () => boolean;
   applyColorToUserText: (color: string) => boolean;
@@ -218,6 +219,20 @@ const ProcessingCanvas = forwardRef<ProcessingCanvasHandle, ProcessingCanvasProp
         c.setActiveObject(img);
         c.renderAll();
         onPhotoChangeRef.current?.();
+      },
+
+      clearUserPhoto: () => {
+        const c = fabricRef.current;
+        if (!c) return false;
+
+        const existing = findUserPhoto(c.getObjects());
+        if (!existing) return false;
+
+        c.remove(existing);
+        c.discardActiveObject();
+        c.renderAll();
+        onPhotoChangeRef.current?.();
+        return true;
       },
 
       addText: () => {

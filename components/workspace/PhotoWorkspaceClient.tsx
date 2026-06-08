@@ -4,19 +4,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { FabricObject } from "fabric";
 import dynamic from "next/dynamic";
 import { ImageUploader } from "@/components/workspace/ImageUploader";
-import { ExportControls } from "@/components/workspace/ExportControls";
+import { Button } from "@/components/ui/button";
 import type { ProcessingCanvasHandle } from "@/components/workspace/ProcessingCanvas";
 import { getCanvasDimensions } from "@/lib/canvas-config";
 import { getExportDimensions, getImageNaturalSize } from "@/lib/image-export";
 import { WORKSPACE_CONTROLS_WIDTH } from "@/lib/layout";
 import { ASPECT_RATIOS, WORKSPACE_QUICK_TEXT_COLORS } from "@/lib/constants";
 import type { Style } from "@/types";
-import { Type } from "lucide-react";
+import { Download, Type } from "lucide-react";
 import { LoaderCenter } from "@/components/ui/loader";
 import { GlassPageHeader } from "@/components/layout/GlassPageHeader";
+import { WorkspacePhotoTag } from "@/components/workspace/WorkspacePhotoTag";
 import { WorkspaceTextColorSwatches } from "@/components/workspace/WorkspaceTextColorSwatches";
 import { WorkspaceTextFontPicker } from "@/components/workspace/WorkspaceTextFontPicker";
 import { isUserText } from "@/lib/fabric-utils";
+import { cn } from "@/lib/utils";
 import type { UserTextPickerPosition } from "@/lib/workspace-text";
 
 const ProcessingCanvas = dynamic(
@@ -49,6 +51,7 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
 
   const { displayWidth, displayHeight } = getCanvasDimensions(style.aspect_ratio);
   const exportDims = getExportDimensions(displayWidth, displayHeight, exportMultiplier);
+  const canDownload = hasPhoto && !canvasError;
 
   const handleDownload = useCallback(() => {
     const dataUrl = canvasRef.current?.exportImage();
@@ -62,6 +65,12 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
   const refreshExportMultiplier = useCallback(() => {
     setExportMultiplier(canvasRef.current?.getExportMultiplier() ?? 1);
   }, []);
+
+  const handleClearPhoto = useCallback(() => {
+    if (!canvasRef.current?.clearUserPhoto()) return;
+    setHasPhoto(false);
+    refreshExportMultiplier();
+  }, [refreshExportMultiplier]);
 
   const clearHideFontPickerTimeout = useCallback(() => {
     if (hideFontPickerTimeoutRef.current) {
@@ -194,30 +203,43 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
             <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted">
               Imagen
             </p>
-            <ImageUploader
-              onUpload={async (file) => {
-                const url = URL.createObjectURL(file);
-                const dims = await getImageNaturalSize(url);
-                URL.revokeObjectURL(url);
+            <div className="grid grid-cols-[minmax(0,1fr)_3rem] gap-2">
+              <ImageUploader
+                className="min-w-0"
+                onUpload={async (file) => {
+                  const url = URL.createObjectURL(file);
+                  const dims = await getImageNaturalSize(url);
+                  URL.revokeObjectURL(url);
 
-                await canvasRef.current?.setUserPhoto(file);
-                refreshExportMultiplier();
-                setHasPhoto(dims.w > 0);
-              }}
-            />
-          </div>
-          <div>
-            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted">
-              Exportar
-            </p>
-            <ExportControls
-              outputWidth={exportDims.width}
-              outputHeight={exportDims.height}
-              hasPhoto={hasPhoto}
-              onDownload={handleDownload}
-              canDownload={hasPhoto && !canvasError}
-              styleName={style.name}
-            />
+                  await canvasRef.current?.setUserPhoto(file);
+                  refreshExportMultiplier();
+                  setHasPhoto(dims.w > 0);
+                }}
+              />
+              <Button
+                type="button"
+                variant={canDownload ? "default" : "secondary"}
+                className={cn(
+                  "!h-full w-full rounded-xl p-0 transition-colors duration-300",
+                  canDownload
+                    ? "bg-primary text-white hover:bg-primary-hover"
+                    : "liquid-glass-btn",
+                )}
+                disabled={!canDownload}
+                onClick={handleDownload}
+                title={`Descargar ${style.name}`}
+                aria-label={`Descargar ${style.name}`}
+              >
+                <Download className="h-5 w-5" />
+              </Button>
+            </div>
+            {hasPhoto ? (
+              <WorkspacePhotoTag
+                width={exportDims.width}
+                height={exportDims.height}
+                onRemove={handleClearPhoto}
+              />
+            ) : null}
           </div>
         </div>
 

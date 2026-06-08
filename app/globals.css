@@ -1149,6 +1149,66 @@ body {
   }
 }
 
+.workspace-photo-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: fit-content;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--foreground);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.workspace-photo-tag:hover {
+  border-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.workspace-photo-tag__label {
+  padding: 0.375rem 0.75rem;
+}
+
+.workspace-photo-tag__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-left: 0 solid transparent;
+  background: transparent;
+  color: var(--muted);
+  opacity: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    width 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 150ms ease,
+    padding 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    margin 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 150ms ease,
+    border-color 150ms ease;
+}
+
+.workspace-photo-tag:hover .workspace-photo-tag__remove {
+  width: 1.75rem;
+  margin-right: 0.25rem;
+  opacity: 1;
+  border-left-width: 1px;
+  border-left-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.workspace-photo-tag__remove:hover {
+  color: var(--danger);
+}
+
 .workspace-text-color-swatches {
   display: flex;
   align-items: center;
