@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { DesktopOnlyGate } from "@/components/layout/DesktopOnlyGate";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { ROOT_METADATA } from "@/lib/seo";
 import { Toaster } from "@/components/ui/sonner";
@@ -71,7 +70,7 @@ export default function RootLayout({
         <link href={CANVAS_FONTS_URL} rel="stylesheet" />
       </head>
       <body className="min-h-full bg-background text-foreground">
-        <DesktopOnlyGate>{children}</DesktopOnlyGate>
+        {children}
         <Toaster />
       </body>
     </html>

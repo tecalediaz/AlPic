@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import { Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -13,9 +13,10 @@ interface ImageUploaderProps {
 
 export function ImageUploader({ onUpload, disabled, className }: ImageUploaderProps) {
   const [dragOver, setDragOver] = useState(false);
+  const inputId = useId();
 
   const handleFile = useCallback(
-    (file: File) => {
+    async (file: File) => {
       if (!file.type.startsWith("image/")) {
         toast.error("El archivo no es una imagen válida");
         return;
@@ -24,13 +25,18 @@ export function ImageUploader({ onUpload, disabled, className }: ImageUploaderPr
         toast.error("La imagen supera los 20MB permitidos");
         return;
       }
-      void onUpload(file);
+      try {
+        await onUpload(file);
+      } catch {
+        toast.error("No se pudo cargar la imagen. Probá con otro archivo.");
+      }
     },
     [onUpload],
   );
 
   return (
-    <div
+    <label
+      htmlFor={inputId}
       className={cn(
         "liquid-glass-btn flex min-h-[6.75rem] cursor-pointer flex-col items-center justify-center rounded-xl p-8",
         dragOver && "scale-[1.02] border-accent/40",
@@ -48,18 +54,22 @@ export function ImageUploader({ onUpload, disabled, className }: ImageUploaderPr
         const file = e.dataTransfer.files[0];
         if (file) handleFile(file);
       }}
-      onClick={() => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = () => {
-          const file = input.files?.[0];
-          if (file) handleFile(file);
-        };
-        input.click();
-      }}
     >
+      <input
+        id={inputId}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        disabled={disabled}
+        aria-label="Cargar imagen desde el equipo"
+        onChange={(e) => {
+          const file = e.currentTarget.files?.[0];
+          if (file) void handleFile(file);
+          e.currentTarget.value = "";
+        }}
+      />
       <Upload className="h-10 w-10 text-muted" />
-    </div>
+      <span className="mt-2 text-center text-xs text-muted">Cargar imagen</span>
+    </label>
   );
 }

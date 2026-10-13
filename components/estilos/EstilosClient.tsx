@@ -3,16 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { WorkspaceFloatingBar } from "@/components/workspace/WorkspaceFloatingBar";
 import { NewStyleDialog } from "@/components/workspace/NewStyleDialog";
 import { DeleteStyleDialog } from "@/components/workspace/DeleteStyleDialog";
 import { GlassPageHeader } from "@/components/layout/GlassPageHeader";
 import { PAGE_MAX_WIDTH } from "@/lib/layout";
 import { StyleSelector } from "@/components/workspace/StyleSelector";
-import { getInitialFabricJson } from "@/lib/canvas-config";
 import type { StyleListItem } from "@/types";
 import { LoaderCenter } from "@/components/ui/loader";
 import { toast } from "sonner";
+import { createLocalStyle, deleteLocalStyle, listLocalStyles } from "@/lib/local-styles";
+import Link from "next/link";
 
 interface EstilosClientProps {
   codeId: string;
@@ -28,47 +28,32 @@ export function EstilosClient({ codeId }: EstilosClientProps) {
   const [deleteTarget, setDeleteTarget] = useState<StyleListItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const loadStyles = useCallback(async () => {
+  const loadStyles = useCallback(() => {
     try {
-      const res = await fetch(`/api/styles?codeId=${codeId}`, { credentials: "include" });
-      const data = await res.json();
-      setStyles(data.styles ?? []);
-    } catch {
-      toast.error("Error al cargar estilos");
+      setStyles(listLocalStyles());
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Error al cargar estilos");
     }
-  }, [codeId]);
+  }, []);
 
   useEffect(() => {
-    async function load() {
-      await loadStyles();
+    const task = window.setTimeout(() => {
+      loadStyles();
       setLoading(false);
-    }
-    void load();
+    }, 0);
+    return () => window.clearTimeout(task);
   }, [loadStyles]);
 
   async function handleCreateStyle() {
     if (!newStyleName.trim()) return;
     setCreating(true);
     try {
-      const fabricJson = getInitialFabricJson("9:16");
-      const res = await fetch("/api/styles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          code_id: codeId,
-          name: newStyleName,
-          aspect_ratio: "9:16",
-          fabric_json: fabricJson,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const style = createLocalStyle(newStyleName);
       setShowNewForm(false);
       setNewStyleName("");
-      router.push(`/editor/${codeId}/${data.id}`);
-    } catch {
-      toast.error("Error al crear estilo");
+      router.push(`/editor/${codeId}/${style.id}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Error al crear estilo");
     } finally {
       setCreating(false);
     }
@@ -77,15 +62,11 @@ export function EstilosClient({ codeId }: EstilosClientProps) {
   async function handleDelete(styleId: string) {
     setDeleting(true);
     try {
-      const res = await fetch(`/api/styles/${styleId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error();
+      deleteLocalStyle(styleId);
       setStyles((prev) => prev.filter((s) => s.id !== styleId));
       toast.success("Estilo eliminado");
-    } catch {
-      toast.error("Error al eliminar estilo");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Error al eliminar estilo");
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
@@ -100,7 +81,8 @@ export function EstilosClient({ codeId }: EstilosClientProps) {
     <>
       <div className="flex min-h-screen flex-col bg-background">
         <GlassPageHeader
-          title="Mis estilos"
+          title="Estilos locales"
+          backHref="/"
           actions={
             <button
               type="button"
@@ -116,6 +98,17 @@ export function EstilosClient({ codeId }: EstilosClientProps) {
           className="mx-auto w-full flex-1 px-8 py-6"
           style={{ maxWidth: PAGE_MAX_WIDTH }}
         >
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+            <p>Se guardan solo en este navegador. Tus fotos no se suben a un servidor.</p>
+            <Link href="/" className="text-primary hover:underline">Sobre el proyecto</Link>
+          </div>
+          {styles.length === 0 && (
+            <div className="mb-6 rounded-xl border border-border bg-card p-7">
+              <h2 className="text-xl font-semibold">Tu primer estilo empieza acá</h2>
+              <p className="mt-2 max-w-xl text-muted-foreground">Creá una plantilla, editá sus capas y después aplicala a una foto para descargar el resultado.</p>
+              <button type="button" className="mt-5 rounded-full bg-primary px-5 py-2.5 font-semibold text-white hover:bg-primary-hover" onClick={() => setShowNewForm(true)}>Crear estilo</button>
+            </div>
+          )}
           <StyleSelector
             styles={styles}
             codeId={codeId}
@@ -124,11 +117,6 @@ export function EstilosClient({ codeId }: EstilosClientProps) {
           />
         </div>
       </div>
-
-      <WorkspaceFloatingBar
-        onSwitch={(newCodeId) => window.location.assign(`/estilos/${newCodeId}`)}
-        onExit={() => window.location.assign("/")}
-      />
 
       <NewStyleDialog
         open={showNewForm}

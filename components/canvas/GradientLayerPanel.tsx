@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef } from "react";
 import { type Rect } from "fabric";
 import { Label } from "@/components/ui/label";
 import { GradientColorInput } from "@/components/canvas/ColorInput";
@@ -94,27 +94,6 @@ function GradientBar({ data, onChange }: GradientBarProps) {
     onChange(d1 <= d2 ? { stop1: offset } : { stop2: offset });
   }
 
-  const Handle = useCallback(
-    ({
-      stopKey,
-      offset,
-      color,
-    }: {
-      stopKey: "stop1" | "stop2";
-      offset: number;
-      color: string;
-    }) => (
-      <div
-        data-handle={stopKey}
-        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-5 w-3 rounded-sm border-2 border-white shadow-md cursor-ew-resize ring-1 ring-black/20"
-        style={{ left: `${offset * 100}%`, backgroundColor: color }}
-        onPointerDown={(e) => startDrag(stopKey, e)}
-      />
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [s1, s2, data.color1, data.color2],
-  );
-
   return (
     <div className="space-y-1">
       <Label className="text-xs">Posición de los colores</Label>
@@ -124,8 +103,28 @@ function GradientBar({ data, onChange }: GradientBarProps) {
         style={{ background: cssGradient }}
         onClick={handleBarClick}
       >
-        <Handle stopKey="stop1" offset={s1} color={c1} />
-        <Handle stopKey="stop2" offset={s2} color={c2} />
+        {([ ["stop1", s1, c1], ["stop2", s2, c2] ] as const).map(([stopKey, offset, color]) => (
+          <div
+            key={stopKey}
+            data-handle={stopKey}
+            role="slider"
+            tabIndex={0}
+            aria-label={`Posición del color ${stopKey === "stop1" ? "1" : "2"}`}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(offset * 100)}
+            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-5 w-3 rounded-sm border-2 border-white shadow-md cursor-ew-resize ring-1 ring-black/20"
+            style={{ left: `${offset * 100}%`, backgroundColor: color }}
+            onPointerDown={(e) => startDrag(stopKey, e)}
+            onKeyDown={(e) => {
+              const step = e.shiftKey ? 0.1 : 0.01;
+              if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                e.preventDefault();
+                onChange({ [stopKey]: Math.max(0, Math.min(1, offset + (e.key === "ArrowRight" ? step : -step))) });
+              }
+            }}
+          />
+        ))}
       </div>
       <div className="flex justify-between text-[10px] text-muted px-0.5">
         <span>{Math.round(s1 * 100)}%</span>

@@ -12,7 +12,6 @@ import { CanvasToolbar } from "@/components/canvas/CanvasToolbar";
 import { LayerPanel } from "@/components/canvas/LayerPanel";
 import { PropertiesPanel } from "@/components/canvas/PropertiesPanel";
 import type { FabricCanvasHandle } from "@/components/canvas/FabricCanvas";
-import { EDITOR_LEFT_PANEL_WIDTH, EDITOR_RIGHT_PANEL_WIDTH } from "@/lib/layout";
 import { estimateJsonSize } from "@/lib/canvas-config";
 import {
   Select,
@@ -31,6 +30,7 @@ import type { AspectRatio, Style } from "@/types";
 import { LoaderCenter } from "@/components/ui/loader";
 import { toast } from "sonner";
 import { storeLatestSavedStyle } from "@/lib/style-update-store";
+import { saveLocalStyle } from "@/lib/local-styles";
 const FabricCanvas = dynamic(() => import("@/components/canvas/FabricCanvas"), {
   ssr: false,
   loading: () => <LoaderCenter className="h-[400px] w-full" />,
@@ -103,29 +103,19 @@ export function EditorClient({ codeId, styleId, initialStyle }: EditorClientProp
 
       const thumbnail = generateThumbnail(c, displayWidth);
 
-      const res = await fetch(`/api/styles/${styleId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          name: styleName,
-          fabric_json: fabricJson,
-          thumbnail,
-          aspect_ratio: aspectRatio,
-        }),
+      const saved = saveLocalStyle(styleId, {
+        name: styleName,
+        fabric_json: fabricJson,
+        thumbnail,
+        aspect_ratio: aspectRatio,
       });
-
-      if (!res.ok) throw new Error("Error al guardar");
-
-      const saved = await res.json();
-
-      if (saved.style) storeLatestSavedStyle(saved.style as Style);
+      storeLatestSavedStyle(saved);
 
       setIsDirty(false);
       setLastSaved(true);
       toast.success("Estilo guardado");
-    } catch {
-      toast.error("Error al guardar el estilo");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Error al guardar el estilo");
     } finally {
       setSaving(false);
     }
@@ -282,7 +272,7 @@ export function EditorClient({ codeId, styleId, initialStyle }: EditorClientProp
       <div
         className="grid flex-1 overflow-hidden"
         style={{
-          gridTemplateColumns: `${EDITOR_LEFT_PANEL_WIDTH}px 1fr ${EDITOR_RIGHT_PANEL_WIDTH}px`,
+          gridTemplateColumns: "clamp(200px, 20vw, 260px) minmax(0, 1fr) clamp(220px, 23vw, 300px)",
         }}
       >
         <aside className="panel-scroll overflow-y-auto border-r border-border bg-surface p-4">
@@ -327,7 +317,6 @@ export function EditorClient({ codeId, styleId, initialStyle }: EditorClientProp
             Propiedades
           </p>
           <PropertiesPanel
-            canvas={canvas}
             selectedObject={selectedObject}
             onModified={handleModified}
             liveUpdateTick={liveUpdateTick}

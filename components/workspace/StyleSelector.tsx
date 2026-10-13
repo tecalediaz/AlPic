@@ -74,7 +74,7 @@ export function StyleSelector({
               </div>
             </button>
 
-            <div className="absolute right-2 top-2 z-10 flex gap-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <div className="absolute right-2 top-2 z-10 flex gap-1.5 opacity-100 transition-opacity duration-200 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
               <Button
                 type="button"
                 variant="ghost"
@@ -84,6 +84,7 @@ export function StyleSelector({
               >
                 <Link
                   href={`/editor/${codeId}/${style.id}`}
+                  aria-label={`Editar ${style.name}`}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Pencil className="h-4 w-4" />
@@ -99,6 +100,7 @@ export function StyleSelector({
                     e.stopPropagation();
                     onDelete(style);
                   }}
+                  aria-label={`Eliminar ${style.name}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

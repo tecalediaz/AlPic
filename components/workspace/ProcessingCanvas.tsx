@@ -30,7 +30,7 @@ import {
 
 export interface ProcessingCanvasHandle {
   getCanvas: () => Canvas | null;
-  exportImage: () => string | null;
+  exportImage: () => Promise<Blob | null>;
   getExportMultiplier: () => number;
   setUserPhoto: (source: string | File) => Promise<void>;
   clearUserPhoto: () => boolean;
@@ -148,7 +148,7 @@ const ProcessingCanvas = forwardRef<ProcessingCanvasHandle, ProcessingCanvasProp
         return calcPhotoExportMultiplier(scale, displayWidth, displayHeight);
       },
 
-      exportImage: () => {
+      exportImage: async () => {
         const c = fabricRef.current;
         if (!c) return null;
 
@@ -170,7 +170,9 @@ const ProcessingCanvas = forwardRef<ProcessingCanvasHandle, ProcessingCanvasProp
           ctx.imageSmoothingQuality = "high";
         }
 
-        return exportCanvas.toDataURL("image/png");
+        return new Promise<Blob | null>((resolve) => {
+          exportCanvas.toBlob(resolve, "image/png");
+        });
       },
 
       setUserPhoto: async (source: string | File) => {
@@ -304,8 +306,9 @@ const ProcessingCanvas = forwardRef<ProcessingCanvasHandle, ProcessingCanvasProp
         applyCanvasRenderQuality(canvas);
         fabricRef.current = canvas;
 
-        const staleBlobs = countStaleBlobImages(fabricJson);
-        const safeJson = sanitizeFabricJson(fabricJson);
+        const storedJson = JSON.parse(fabricJsonKey) as object;
+        const staleBlobs = countStaleBlobImages(storedJson);
+        const safeJson = sanitizeFabricJson(storedJson);
 
         try {
           await canvas.loadFromJSON(safeJson);

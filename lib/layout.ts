@@ -1,5 +1,5 @@
 /** Ancho mínimo del layout desktop (scroll horizontal en pantallas más chicas) */
-export const LAYOUT_MIN_WIDTH = 1280;
+export const LAYOUT_MIN_WIDTH = 800;
 
 /** Anchos fijos de paneles del editor */
 export const EDITOR_LEFT_PANEL_WIDTH = 260;

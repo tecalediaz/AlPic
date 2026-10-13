@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: ["/", "/new"],
-      disallow: ["/estilos/", "/workspace/", "/editor/", "/api/"],
+      allow: "/",
+      disallow: ["/estilos/", "/workspace/", "/editor/"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,

@@ -1,6 +1,6 @@
 "use client";
 
-import { type Canvas, type FabricImage, type FabricObject, type Group, type IText } from "fabric";
+import { type FabricImage, type FabricObject, type Group, type IText } from "fabric";
 import { TextPanel } from "@/components/canvas/TextPanel";
 import { ImagePanel } from "@/components/canvas/ImageSlotPanel";
 import { ShapePanel } from "@/components/canvas/ShapePanel";
@@ -15,14 +15,12 @@ import {
 } from "@/lib/fabric-utils";
 
 interface PropertiesPanelProps {
-  canvas: Canvas | null;
   selectedObject?: FabricObject;
   onModified: () => void;
   liveUpdateTick?: number;
 }
 
 export function PropertiesPanel({
-  canvas,
   selectedObject,
   onModified,
   liveUpdateTick,

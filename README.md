@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AlPic
 
-## Getting Started
+AlPic es un proyecto personal de [tecalediaz](https://tecalediaz.com). Permite diseñar una plantilla para redes sociales, aplicarla a distintas fotos y descargar el resultado en PNG. La [demo](https://alpicxd.netlify.app) incluye el flujo completo.
 
-First, run the development server:
+## Probarlo
+
+1. Abrí la demo en una computadora con una ventana de al menos **800 px** de ancho.
+2. Elegí **Probar AlPic** y creá un estilo.
+3. Diseñá la plantilla en el editor y guardala.
+4. Seleccioná el estilo, cargá una foto y descargá la imagen final.
+
+Los estilos se guardan en `localStorage` del navegador. No hay cuentas, base de datos ni servidor que almacene fotos o plantillas. Los estilos quedan en ese navegador y se pierden si se borran sus datos. Las fotos cargadas para aplicar un estilo se procesan en el navegador.
+
+## Ejecutar localmente
+
+Requiere Node.js 20 o superior.
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrí [http://localhost:3000](http://localhost:3000). No hacen falta variables de entorno.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Verificar
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```
 
-## Learn More
+## Tecnologías
 
-To learn more about Next.js, take a look at the following resources:
+Next.js 16, React 19, TypeScript, Fabric.js y Tailwind CSS. El sitio está configurado para publicarse en Netlify mediante `netlify.toml`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Licencia
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Este repositorio contiene el código del proyecto. Consultá [LICENSE](LICENSE) para los términos de uso.

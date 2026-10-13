@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import type { ProcessingCanvasHandle } from "@/components/workspace/ProcessingCanvas";
 import { getCanvasDimensions } from "@/lib/canvas-config";
 import { getExportDimensions, getImageNaturalSize } from "@/lib/image-export";
-import { WORKSPACE_CONTROLS_WIDTH } from "@/lib/layout";
 import { ASPECT_RATIOS, WORKSPACE_QUICK_TEXT_COLORS } from "@/lib/constants";
 import type { Style } from "@/types";
 import { Download, Type } from "lucide-react";
@@ -19,6 +18,7 @@ import { WorkspaceTextColorSwatches } from "@/components/workspace/WorkspaceText
 import { WorkspaceTextFontPicker } from "@/components/workspace/WorkspaceTextFontPicker";
 import { isUserText } from "@/lib/fabric-utils";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import type { UserTextPickerPosition } from "@/lib/workspace-text";
 
 const ProcessingCanvas = dynamic(
@@ -53,13 +53,21 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
   const exportDims = getExportDimensions(displayWidth, displayHeight, exportMultiplier);
   const canDownload = hasPhoto && !canvasError;
 
-  const handleDownload = useCallback(() => {
-    const dataUrl = canvasRef.current?.exportImage();
-    if (!dataUrl) return;
-    const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = `alpic-${style.name}-${Date.now()}.png`;
-    a.click();
+  const handleDownload = useCallback(async () => {
+    try {
+      const blob = await canvasRef.current?.exportImage();
+      if (!blob) throw new Error("No se pudo generar el PNG.");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `alpic-${style.name.replace(/[^a-z0-9áéíóúñ_-]+/gi, "-")}-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      toast.error("No se pudo descargar la imagen. Probá con una foto más pequeña.");
+    }
   }, [style.name]);
 
   const refreshExportMultiplier = useCallback(() => {
@@ -196,7 +204,7 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
       />
       <div
         className="grid min-h-0 flex-1 overflow-hidden"
-        style={{ gridTemplateColumns: `${WORKSPACE_CONTROLS_WIDTH}px 1fr` }}
+        style={{ gridTemplateColumns: "clamp(260px, 30vw, 380px) minmax(0, 1fr)" }}
       >
         <div className="panel-scroll space-y-6 overflow-y-auto p-6">
           <div>
@@ -226,7 +234,7 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
                     : "liquid-glass-btn",
                 )}
                 disabled={!canDownload}
-                onClick={handleDownload}
+                onClick={() => void handleDownload()}
                 title={`Descargar ${style.name}`}
                 aria-label={`Descargar ${style.name}`}
               >
