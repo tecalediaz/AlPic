@@ -211,7 +211,7 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
             <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted">
               Imagen
             </p>
-            <div className="grid grid-cols-[minmax(0,1fr)_3rem] gap-2">
+            <div className="flex flex-col gap-3">
               <ImageUploader
                 className="min-w-0"
                 onUpload={async (file) => {
@@ -228,7 +228,7 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
                 type="button"
                 variant={canDownload ? "default" : "secondary"}
                 className={cn(
-                  "!h-full w-full rounded-xl p-0 transition-colors duration-300",
+                  "h-11 w-full rounded-full transition-colors duration-300",
                   canDownload
                     ? "bg-primary text-white hover:bg-primary-hover"
                     : "liquid-glass-btn",
@@ -238,7 +238,8 @@ export function PhotoWorkspaceClient({ codeId, style }: PhotoWorkspaceClientProp
                 title={`Descargar ${style.name}`}
                 aria-label={`Descargar ${style.name}`}
               >
-                <Download className="h-5 w-5" />
+                <Download className="h-4 w-4" />
+                Descargar PNG
               </Button>
             </div>
             {hasPhoto ? (

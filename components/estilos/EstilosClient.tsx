@@ -1,18 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { ArrowUpRight, Plus } from "lucide-react";
 import { NewStyleDialog } from "@/components/workspace/NewStyleDialog";
 import { DeleteStyleDialog } from "@/components/workspace/DeleteStyleDialog";
-import { GlassPageHeader } from "@/components/layout/GlassPageHeader";
+import { AlpicLogo } from "@/components/layout/AlpicLogo";
 import { PAGE_MAX_WIDTH } from "@/lib/layout";
 import { StyleSelector } from "@/components/workspace/StyleSelector";
 import type { StyleListItem } from "@/types";
 import { LoaderCenter } from "@/components/ui/loader";
 import { toast } from "sonner";
 import { createLocalStyle, deleteLocalStyle, listLocalStyles } from "@/lib/local-styles";
-import Link from "next/link";
 
 interface EstilosClientProps {
   codeId: string;
@@ -80,34 +80,35 @@ export function EstilosClient({ codeId }: EstilosClientProps) {
   return (
     <>
       <div className="flex min-h-screen flex-col bg-background">
-        <GlassPageHeader
-          title="Estilos locales"
-          backHref="/"
-          actions={
-            <button
-              type="button"
-              className="liquid-glass-btn glass-header-action"
-              onClick={() => setShowNewForm(true)}
-            >
-              <Plus className="h-4 w-4" />
-              Nuevo estilo
-            </button>
-          }
-        />
+        <header className="styles-home-header">
+          <AlpicLogo variant="onDark" size="md" href="/" priority />
+          <h1 className="styles-home-header__title">Mis estilos</h1>
+          <button type="button" className="styles-home-create" onClick={() => setShowNewForm(true)}>
+            <Plus className="h-4 w-4" /> Nuevo estilo
+          </button>
+        </header>
         <div
-          className="mx-auto w-full flex-1 px-8 py-6"
+          className="mx-auto w-full flex-1 px-8 py-10"
           style={{ maxWidth: PAGE_MAX_WIDTH }}
         >
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
-            <p>Se guardan solo en este navegador. Tus fotos no se suben a un servidor.</p>
-            <Link href="/" className="text-primary hover:underline">Sobre el proyecto</Link>
-          </div>
           {styles.length === 0 && (
-            <div className="mb-6 rounded-xl border border-border bg-card p-7">
-              <h2 className="text-xl font-semibold">Tu primer estilo empieza acá</h2>
-              <p className="mt-2 max-w-xl text-muted-foreground">Creá una plantilla, editá sus capas y después aplicala a una foto para descargar el resultado.</p>
-              <button type="button" className="mt-5 rounded-full bg-primary px-5 py-2.5 font-semibold text-white hover:bg-primary-hover" onClick={() => setShowNewForm(true)}>Crear estilo</button>
-            </div>
+            <section className="styles-home-empty" aria-labelledby="styles-empty-title">
+              <div className="styles-home-empty__copy">
+                <span className="styles-home-eyebrow">Tu espacio creativo</span>
+                <h2 id="styles-empty-title">Creá tu primer estilo.</h2>
+                <p>Diseñá una plantilla, agregá tu logo y aplicala a todas tus fotos.</p>
+                <button type="button" className="styles-home-create styles-home-create--large" onClick={() => setShowNewForm(true)}>
+                  <Plus className="h-5 w-5" /> Crear estilo <ArrowUpRight className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="styles-home-empty__visual" aria-hidden="true">
+                <div className="styles-home-empty__poster">
+                  <Image src="/example-photo.jpg" alt="" fill sizes="300px" className="object-cover" />
+                  <div className="styles-home-empty__poster-shade" />
+                  <div className="styles-home-empty__poster-copy"><span>ALPIC / TU ESTILO</span><strong>Una imagen.<br />Tu identidad.</strong></div>
+                </div>
+              </div>
+            </section>
           )}
           <StyleSelector
             styles={styles}

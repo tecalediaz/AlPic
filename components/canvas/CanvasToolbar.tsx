@@ -115,7 +115,7 @@ export function CanvasToolbar({
           </Button>
           <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
             <ImagePlus className="h-4 w-4" />
-            Imagen
+            Imagen / logo
           </Button>
           <Button variant="secondary" size="sm" onClick={addRect}>
             <Square className="h-4 w-4" />

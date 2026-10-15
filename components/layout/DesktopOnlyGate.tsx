@@ -1,5 +1,4 @@
 import { Monitor } from "lucide-react";
-import Link from "next/link";
 import { AlpicLogo } from "@/components/layout/AlpicLogo";
 import { LoginCreatorFooter } from "@/components/layout/LoginCreatorFooter";
 
@@ -28,7 +27,6 @@ export function DesktopOnlyGate({ children }: DesktopOnlyGateProps) {
             </p>
 
             <p className="desktop-only-screen__hint">Ancho mínimo recomendado: 800px</p>
-            <Link href="/" className="mt-5 inline-block text-primary underline">Conocer el proyecto</Link>
           </div>
         </div>
 

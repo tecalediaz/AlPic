@@ -47,7 +47,7 @@ export function StyleSelector({
               className="style-card w-full cursor-pointer overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm"
             >
               <div
-                className="canvas-checkerboard relative w-full overflow-hidden bg-surface"
+                className="canvas-checkerboard style-card-preview relative w-full overflow-hidden bg-surface"
                 style={{ aspectRatio: getAspectRatioValue(ratio) }}
               >
                 {style.thumbnail ? (
@@ -59,18 +59,13 @@ export function StyleSelector({
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-sm text-muted">
-                    Sin preview
+                    Sin vista previa
                   </div>
                 )}
-
-                <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/35 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <p className="translate-y-2 font-medium text-white transition-transform duration-300 group-hover:translate-y-0">
-                    {style.name}
-                  </p>
-                  <p className="mt-1 translate-y-2 text-sm text-white/75 transition-[transform,opacity] delay-75 duration-300 group-hover:translate-y-0">
-                    {ratio} — {ratioMeta.label}
-                  </p>
-                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3 px-4 py-3">
+                <span className="truncate font-semibold text-foreground">{style.name}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">{ratio} · {ratioMeta.label}</span>
               </div>
             </button>
 

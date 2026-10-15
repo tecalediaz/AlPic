@@ -185,7 +185,7 @@ export function EditorClient({ codeId, styleId, initialStyle }: EditorClientProp
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-secondary px-6 text-secondary-foreground">
+      <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border bg-secondary px-6 text-secondary-foreground">
         <Button variant="ghost" size="sm" className="header-btn rounded-full" onClick={() => {
             router.refresh();
             router.push(`/estilos/${codeId}`);
