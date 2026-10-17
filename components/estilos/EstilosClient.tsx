@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { NewStyleDialog } from "@/components/workspace/NewStyleDialog";
 import { DeleteStyleDialog } from "@/components/workspace/DeleteStyleDialog";
 import { AlpicLogo } from "@/components/layout/AlpicLogo";
@@ -81,11 +80,7 @@ export function EstilosClient({ codeId }: EstilosClientProps) {
     <>
       <div className="flex min-h-screen flex-col bg-background">
         <header className="styles-home-header">
-          <AlpicLogo variant="onDark" size="md" href="/" priority />
-          <h1 className="styles-home-header__title">Mis estilos</h1>
-          <button type="button" className="styles-home-create" onClick={() => setShowNewForm(true)}>
-            <Plus className="h-4 w-4" /> Nuevo estilo
-          </button>
+          <AlpicLogo variant="onDark" size="md" href="/" priority className="styles-home-logo" />
         </header>
         <div
           className="mx-auto w-full flex-1 px-8 py-10"
@@ -94,19 +89,10 @@ export function EstilosClient({ codeId }: EstilosClientProps) {
           {styles.length === 0 && (
             <section className="styles-home-empty" aria-labelledby="styles-empty-title">
               <div className="styles-home-empty__copy">
-                <span className="styles-home-eyebrow">Tu espacio creativo</span>
-                <h2 id="styles-empty-title">Creá tu primer estilo.</h2>
-                <p>Diseñá una plantilla, agregá tu logo y aplicala a todas tus fotos.</p>
+                <h1 id="styles-empty-title">Creá tu primer estilo.</h1>
                 <button type="button" className="styles-home-create styles-home-create--large" onClick={() => setShowNewForm(true)}>
-                  <Plus className="h-5 w-5" /> Crear estilo <ArrowUpRight className="h-4 w-4" />
+                  <Plus className="h-5 w-5" /> Crear estilo
                 </button>
-              </div>
-              <div className="styles-home-empty__visual" aria-hidden="true">
-                <div className="styles-home-empty__poster">
-                  <Image src="/example-photo.jpg" alt="" fill sizes="300px" className="object-cover" />
-                  <div className="styles-home-empty__poster-shade" />
-                  <div className="styles-home-empty__poster-copy"><span>ALPIC / TU ESTILO</span><strong>Una imagen.<br />Tu identidad.</strong></div>
-                </div>
               </div>
             </section>
           )}
