@@ -86,6 +86,13 @@ export function EstilosClient({ codeId }: EstilosClientProps) {
           className="mx-auto w-full flex-1 px-8 py-10"
           style={{ maxWidth: PAGE_MAX_WIDTH }}
         >
+          {styles.length > 0 && (
+            <div className="mb-6 flex justify-end">
+              <button type="button" className="styles-home-create" onClick={() => setShowNewForm(true)}>
+                <Plus className="h-4 w-4" /> Nuevo estilo
+              </button>
+            </div>
+          )}
           {styles.length === 0 && (
             <section className="styles-home-empty" aria-labelledby="styles-empty-title">
               <div className="styles-home-empty__copy">
